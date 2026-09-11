@@ -149,7 +149,7 @@ func TestPromQLMetricSource_CustomExprPassthrough(t *testing.T) {
 	}))
 	defer server.Close()
 
-	expr := `max(avg_over_time(inference_extension_flow_control_pool_saturation{inference_pool="my-pool"}[5m]))`
+	expr := `max(avg_over_time(llm_d_epp_flow_control_pool_saturation{inference_pool="my-pool"}[5m]))`
 	source, err := NewPromQLMetricSource(api.Config{Address: server.URL}, expr)
 	require.NoError(t, err)
 
@@ -263,7 +263,7 @@ func TestNewSaturationPromQLSourceFromConfig(t *testing.T) {
 		source, err := NewSaturationPromQLSourceFromConfig(promConfig,
 			map[string]any{"pool": "my-pool"})
 		require.NoError(t, err)
-		require.Contains(t, source.expr, `1 - inference_extension_flow_control_pool_saturation{inference_pool="my-pool"}`)
+		require.Contains(t, source.expr, `1 - llm_d_epp_flow_control_pool_saturation{inference_pool="my-pool"}`)
 		require.NotContains(t, source.expr, "namespace")
 	})
 
