@@ -1,6 +1,10 @@
 package util
 
-import "testing"
+import (
+	"net/http"
+	"testing"
+	"time"
+)
 
 func TestNormalizeURLPath(t *testing.T) {
 	tests := []struct {
@@ -44,6 +48,33 @@ func TestNormalizeBaseURL(t *testing.T) {
 			got := NormalizeBaseURL(tt.baseURL)
 			if got != tt.want {
 				t.Errorf("NormalizeBaseURL(%q) = %q, want %q", tt.baseURL, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestParseRetryAfter(t *testing.T) {
+	tests := []struct {
+		name     string
+		value    string
+		wantZero bool
+	}{
+		{name: "integer seconds", value: "120"},
+		{name: "zero seconds", value: "0", wantZero: true},
+		{name: "HTTP-date future", value: time.Now().Add(10 * time.Second).UTC().Format(http.TimeFormat)},
+		{name: "HTTP-date past", value: time.Now().Add(-10 * time.Second).UTC().Format(http.TimeFormat), wantZero: true},
+		{name: "negative integer", value: "-5", wantZero: true},
+		{name: "invalid value", value: "abc", wantZero: true},
+		{name: "empty string", value: "", wantZero: true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			d := ParseRetryAfter(tt.value)
+			if tt.wantZero && d != 0 {
+				t.Errorf("expected zero duration, got %v", d)
+			}
+			if !tt.wantZero && d <= 0 {
+				t.Errorf("expected positive duration, got %v", d)
 			}
 		})
 	}

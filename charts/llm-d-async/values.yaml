@@ -90,12 +90,24 @@ ap:
   # via --transform-config-file. Object with a requestTransforms array; each entry
   # has a unique name, a registered plugin type, and opaque parameters. Empty
   # disables transforms (default JSON dispatch is unchanged).
+  # Each transform type defines how it matches requests. For GCS, the request's
+  # metadata.provider must appear in parameters.providers. If several GCS entries
+  # match, the first matching transform in requestTransforms handles the request.
+  # Other transform plugin types can be added as additional requestTransforms entries.
   # transformConfig:
   #   requestTransforms:
-  #     - name: "gcs-whisper"
+  #     - name: "gcs-file-audio"
+  #       type: "gcs_file_multipart"
+  #       parameters:
+  #         providers: ["whisper-file"]
+  #         allowedHosts: '["storage.googleapis.com"]'
+  #         # maxFileBytes caps the GCS object size per request. Budget about that
+  #         # much memory per active transform, plus form fields and buffer overhead.
+  #         maxFileBytes: "26214400"
+  #     - name: "gcs-url-audio"
   #       type: "gcs_uri_multipart"
   #       parameters:
-  #         providers: ["whisper"]
+  #         providers: ["whisper-url"]
   transformConfig: {}
   # Request merge policy configuration. When set, rendered to a config file and passed
   # via --request-merge-policy-config-file.
